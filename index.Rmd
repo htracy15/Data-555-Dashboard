@@ -1,0 +1,108 @@
+---
+title: "DATA 555 Dashboard Assignment"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    vertical_layout: scroll
+    theme: lumen
+date: "2025-02-07"
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r echo=FALSE}
+library(plotly)
+library(dplyr)
+library(tidyr)
+library(bslib)
+library(shinydashboard)
+```
+
+# Dashboard Introduction
+The dataset consists of three different datasets merged together: the Medicare denominator file, Chronic Conditions Warehouse data, and University of Madison-Wisconsin County Health Rankings data (the Medicare denominator file and Chronic Conditions Warehouse data are confidential but University of Madison-Wisconsin County Health Rankings data are public). The Medicare denominator and Chronic Conditions Warehouse data were collected by accessing it through the Emory Rollins High Computing Cluster Environment after obtaining access approval through Emory, while the county health rankings datasets were accessed by downloading them from the University of Madison-Wisconsin County Health Rankings website. The sample size of the data is 803,530 participants. The study population consists of female breast cancer survivors who were continuously enrolled in Medicare Parts A and B between 2016 - 2020 who have no history of depression and who did not move zip codes during the study duration. The Medicare and Chronic Conditions Warehouse data was collected continuously by the Centers for Medicare and Medicaid Services in the United States and the County Health Rankings datasets were collected annually from U.S. counties through aggregating sources from websites like the Census’ American Community Survey, but the specific dataset in my ILE contains information from 2014 - 2020.
+
+Link to Github repository with source code: https://github.com/htracy15/Data-555-Dashboard
+
+Row
+--------------------------------------------------------------------------------
+
+```{r echo = FALSE}
+# read in dataset
+data <- read.csv("thesis_dataset.csv")
+```
+
+# First Interactive Visualization - Side-by-Side Boxplot
+```{r echo = FALSE}
+# reformat data
+widget1_data <- data %>% filter(STATE_CD == "45" & year == "2018") %>%
+select("quartile_shp", "excessive_drinking_raw_value", "Metro_Status") %>% 
+  drop_na()
+
+# Create a new variable to seperate jitter points from boxplot
+widget1_data$jitter <- as.numeric(factor(widget1_data$quartile_shp)) + 0.25
+```
+
+```{r echo = FALSE, fig.width=10, fig.height=10}
+# side-by-side boxplot
+p <- ggplot(widget1_data, aes(x = as.factor(quartile_shp), y = excessive_drinking_raw_value, fill = Metro_Status)) +
+  geom_boxplot(outlier.shape = NA, alpha = 0.5, width = 0.4, position = position_nudge(x = -0.25)) + 
+  geom_jitter(aes(x = jitter, text = paste("County Level Severe Housing Problem Quartile:", quartile_shp, 
+                                           "<br>County Level Excessive Drinking Rate:", round(excessive_drinking_raw_value,2))), 
+                                            width = 0.15, size = 2, alpha = 0.7) + 
+  scale_x_discrete(labels = levels(factor(data$quartile_shp))) +  
+  labs(title = "Boxplots of County-Level Severe Housing Problems and Excessive Drinking Rates",
+       x = "County Level Severe Housing Problem Quartiles",
+       y = "County Level Excessive Drinking Rates (%)",
+       fill = "Metro Status") +
+  theme_minimal()
+
+# Convert to interactive Plotly
+ggplotly(p, tooltip = "text") 
+```
+
+From the side-by-side boxplots, when considering all counties in the dataset, all four quartiles of county-level severe housing problem quartiles do not appear to have significantly different distributions of county-level excessive drinking rates. This pattern holds true when only considering non-metropolitan counties. However, when only considering metropolitan couties, the fourth quartile (indicating the lowest quartile of counties that have the least severe housing problems) appears to be lower from the other three quartiles' distributions of county-level excessive drinking rates as a whole. 
+
+Row {.tabset .tabset-fade}
+--------------------------------------------------------------------------------
+# Second Interactive Visualization - Faceted Scatterplot
+```{r fig.width = 10, fig.height = 10 , warning = FALSE, echo = FALSE}
+widget2_data <- data %>% filter(STATE_CD == "45" & year == "2018") %>%
+  select("homeownership_raw_value", "percentage_of_households_with_overcrowding", 
+         "percentage_of_households_with_high_housing_costs",
+         "percentage_of_households_with_lack_of_kitchen_or_plumbing_facilities")
+
+colnames(widget2_data) <- c("home", "High Housing Costs", "Overcrowding", "Lack of Facilities")
+
+widget2_data_final <- widget2_data %>% pivot_longer(
+  cols = c("High Housing Costs", "Overcrowding", "Lack of Facilities"),
+  names_to = "Housing Problem Type",
+  values_to = "Value")
+```
+
+```{r fig.width = 10, fig.height = 10 , warning = FALSE, echo = FALSE}
+# scatterplot code
+p_scatter <- ggplot(widget2_data_final, aes(x = Value, y = home, color = `Housing Problem Type`)) +
+  geom_point(aes(text = paste("Type of Housing Problem:", `Housing Problem Type`, 
+                              "<br>Homeownership Rate:", round(home*100,2),
+                              "<br>County-Level Percentage for Housing Problem:", round(Value*100,2))), 
+                               size = 1, alpha = 0.6) +
+  facet_wrap(~`Housing Problem Type`) +
+  labs(title = "Scatterplots of Homeownership Rates Across Sub-Types of Severe Housing Problems", 
+       subtitle = "For Medicare Breast Cancer Survivors Diagnosed in 2018, Residing in Texas",
+       x = "County-Level Percentage (Percent of Households with Housing Problem in Each County)", 
+       y = "Homeownership Rates",
+       color = "Housing Problem Type") +
+  scale_color_manual(values = c("High Housing Costs" = "pink", "Overcrowding" = "yellow", "Lack of Facilities" = "green")) +
+   geom_smooth(method = "lm", se = FALSE, linetype = "dashed", color = "black", size = 0.3)
+
+# Convert to interactive plot
+ggplotly(p_scatter, tooltip = "text")
+```
+
+From the first scatterplot, we see that there is a moderate negative association between the percent of households with high housing costs and homeownership rates (where the higher the percent of households with high housing costs in a county, the lower the county-level homeownership rates). From the second scatterplot, we see that there is a very mild positive association between the percent of households who lack facilities (like plumbing and kitchen facilities) in a county and county-level homeownership rates. From the third scatterplot, we see that there is a moderate negative association between the percent of households with overcrowding and homeownership rates (where the higher the percent of households with overcrowding in a county, the lower the county-level homeownership rates).
+
+Row
+--------------------------------------------------------------------------------
+# Real-World Impact and Importance of Dashboard
+This project is important because severe housing problems are a major environmental exposure and there is relatively little research currently on its relationships with negative health outcomes and behaviors such as excessive drinking. The findings will be used to better understand the associations between severe housing problems and excessive drinking rates, which can help inform housing and public health policies and programs. 
