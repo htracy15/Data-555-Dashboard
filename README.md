@@ -1,15 +1,6 @@
 # Dashboard Description
 
-The dataset consists of three different datasets merged together: 
-the Medicare denominator file, Chronic Conditions Warehouse data, and University of Madison-Wisconsin County Health Rankings data 
-(the Medicare denominator file and Chronic Conditions Warehouse data are confidential but University of Madison-Wisconsin County Health Rankings data are public). 
-The Medicare denominator and Chronic Conditions Warehouse data were collected by accessing it through the Emory Rollins High Computing Cluster Environment after 
-obtaining access approval through Emory, while the county health rankings datasets were accessed by downloading them from the University of Madison-Wisconsin County 
-Health Rankings website. The sample size of the data is 803,530 participants. The study population consists of female breast cancer survivors who were continuously 
-enrolled in Medicare Parts A and B between 2016 - 2020 who have no history of depression and who did not move zip codes during the study duration. The Medicare and 
-Chronic Conditions Warehouse data was collected continuously by the Centers for Medicare and Medicaid Services in the United States and the County Health Rankings 
-datasets were collected annually from U.S. counties through aggregating sources from websites like the Census’ American Community Survey, but the specific dataset in 
-my ILE contains information from 2014 - 2020.
+The research topic this dashboard covers is investigating the association between county-level severe housing problems and excessive drinking rates amongst Medicare female breast cancer survivors. County-level severe housing problems were obtained from the County Health Rankings and Roadmaps Program, where the original variable was labeled as “severe housing outcomes” (Reminton et al., 2015; University of Wisconsin Population Health Institute, 2021). The value is a county-level percentage, which is the percent of households in each U.S. county with at least 1 of 4 housing problems: overcrowding [more than 1 person per room], high housing costs [cost burden greater than 50%], incomplete kitchen facilities, or incomplete plumbing facilities). Excessive drinking rates are defined as the percentage of adults reporting binge or heavy drinking (age-adjusted) within each county. These were annual measures from 2016-2020 originally from the CDC’s Behavioral Risk Factor Surveillance System (BRFSS).
 
 # Real-World Importance and Importance of Dashboard
 
